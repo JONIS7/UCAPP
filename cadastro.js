@@ -59,7 +59,7 @@ function renderizarMedicamentos() {
   }
 
   // Cria um card para cada medicamento
-  medicamentos.forEach(medicamento => {
+  medicamentos.forEach((medicamento, index) => {
     // Usamos += para adicionar o HTML de cada card à nossa string
     listaContainer.innerHTML += `
       <div class="col-3 mt-4"><div class="card mb-2">
@@ -72,6 +72,17 @@ function renderizarMedicamentos() {
       </div>
     `;
   });
+}
+
+function apagarMedicamento(index) {
+  // Passo 1: Apagar da lista
+  medicamentos.splice(index, 1);
+
+  // Passo 2: Guardar a nova lista no localStorage
+  localStorage.setItem('listaDeMedicamentos', JSON.stringify(medicamentos));
+
+  // Passo 3: Redesenhar os cards no ecrã
+  renderizarMedicamentos();
 }
 
 
