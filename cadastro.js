@@ -87,7 +87,7 @@ function renderizarMedicamentos() {
 
         // 4. Inserimos a variável de estilo na div do card
         listaContainer.innerHTML += `
-            <div class="col-12 col-md-6 col-lg-4 mb-3">
+            <div class="col-12 col-md-6 col-lg-4 mb-3" data-bs-toggle="modal" data-bs-target="#modalDetalhesMedicamento">
                 <div class="card" ${estiloDoCard}>
                     <div class="card-body">
                         <h5 class="card-title">${medicamento.nome}</h5>
@@ -136,6 +136,39 @@ const handleFile = (event) => {
 
 tirarFotoInput.addEventListener('change', handleFile);
 escolherFicheiroInput.addEventListener('change', handleFile);
+
+const modalDetalhes = document.getElementById('modalDetalhesMedicamento');
+
+modalDetalhes.addEventListener('show.bs.modal', (event) => {
+  // 1. Descobre qual card foi clicado
+  const cardClicado = event.relatedTarget; 
+
+  // 2. Pega no índice que guardámos no botão "Apagar" dentro desse card
+  // (Esta é uma forma inteligente de sabermos qual é o medicamento)
+  const botaoApagar = cardClicado.querySelector('button');
+  const index = botaoApagar.getAttribute('onclick').match(/\d+/)[0];
+
+  // 3. Com o índice, pega no objeto do medicamento
+  const medicamento = medicamentos[index];
+
+  // 4. Seleciona os elementos dentro do modal
+  const modalTitulo = document.getElementById('modalTitulo');
+  const modalNome = document.getElementById('modalNome');
+  const modalData = document.getElementById('modalData');
+  const modalImagem = document.getElementById('modalImagem');
+
+  // 5. Preenche o modal com as informações do medicamento
+  modalTitulo.textContent = medicamento.nome;
+  modalNome.textContent = medicamento.nome;
+  modalData.textContent = medicamento.data;
+
+  if (medicamento.imagem) {
+    modalImagem.src = medicamento.imagem;
+    modalImagem.style.display = 'block'; // Mostra a imagem
+  } else {
+    modalImagem.style.display = 'none'; // Esconde a imagem se não houver
+  }
+});
 
 
 // Listener do formulário ATUALIZADO
