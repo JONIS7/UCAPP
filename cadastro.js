@@ -13,6 +13,18 @@ console.log('Lista de medicamentos carregada:', medicamentos);
 const form = document.getElementById('medicamentoForm');
 const sincronizarBtn = document.getElementById('sincronizarBtn');
 const mensagemAlertas = document.getElementById('mensagemAlertas');
+const tirarFotoBtn = document.getElementById('tirarFotoBtn');
+const tirarFotoInput = document.getElementById('tirarFotoInput');
+const escolherFicheiroBtn = document.getElementById('escolherFicheiroBtn');
+const escolherFicheiroInput = document.getElementById('escolherFicheiroInput');
+
+tirarFotoBtn.addEventListener('click', () => {
+    tirarFotoInput.click();
+});
+
+escolherFicheiroBtn.addEventListener('click', () => {
+    escolherFicheiroInput.click();
+});
 
 // --- 2. LÓGICA DE VERIFICAÇÃO DE ALERTAS (EXECUTADA AO CARREGAR A PÁGINA) ---
 function verificarAlertas() {
@@ -47,31 +59,45 @@ function verificarAlertas() {
 
 // cards html
 function renderizarMedicamentos() {
-  const listaContainer = document.getElementById('listaMedicamentos');
-  
-  // Limpa o conteúdo antigo para não duplicar
-  listaContainer.innerHTML = ''; 
+    const listaContainer = document.getElementById('listaMedicamentos');
+    listaContainer.innerHTML = '';
 
-  // Se não houver medicamentos, mostra uma mensagem
-  if (medicamentos.length === 0) {
-    listaContainer.innerHTML = '<p>Nenhum medicamento registado.</p>';
-    return; // Para a função aqui
-  }
+    if (medicamentos.length === 0) {
+        listaContainer.innerHTML = '<p class="text-center">Nenhum medicamento registado.</p>';
+        return;
+    }
 
-  // Cria um card para cada medicamento
-  medicamentos.forEach((medicamento, index) => {
-    // Usamos += para adicionar o HTML de cada card à nossa string
-    listaContainer.innerHTML += `
-      <div class="col-12 col-md-6 col-lg-4 mb-3"><div class="card mb-2">
-        <div class="card-body">
-          <h5 class="card-title text-center">${medicamento.nome}</h5>
-          <p class="card-text text-center">Vence em: ${medicamento.data}</p>
-          <button class="btn btn-danger btn-sm" onclick="apagarMedicamento(${index})">Apagar</button></div>
-        </div>
-      </div>
-      </div>
-    `;
-  });
+    medicamentos.forEach((medicamento, index) => {
+        // 1. Começamos com o estilo vazio
+        let estiloDoCard = '';
+
+        // 2. Se o medicamento tiver uma imagem guardada...
+        if (medicamento.imagem) {
+            // 3. ...definimos o estilo do background
+            estiloDoCard = `
+                style="
+                    background-image: url(${medicamento.imagem});
+                    background-size: cover;
+                    background-position: center;
+                    color: white; 
+                    text-shadow: 1px 1px 2px black;
+                "
+            `;
+        }
+
+        // 4. Inserimos a variável de estilo na div do card
+        listaContainer.innerHTML += `
+            <div class="col-12 col-md-6 col-lg-4 mb-3">
+                <div class="card" ${estiloDoCard}>
+                    <div class="card-body">
+                        <h5 class="card-title">${medicamento.nome}</h5>
+                        <p class="card-text">Vence em: ${medicamento.data}</p>
+                        <button class="btn btn-danger btn-sm" onclick="apagarMedicamento(${index})">Apagar</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
 }
 
 function apagarMedicamento(index) {
@@ -93,34 +119,57 @@ function apagarMedicamento(index) {
 
 
 // QUANDO O FORMULÁRIO É ENVIADO (CLIQUE EM "SALVAR")
+let imagemGuardada = null; // Variável para guardar a imagem escolhida
+
+// Ouve os dois inputs de ficheiro. Quando uma imagem é escolhida...
+const handleFile = (event) => {
+    const ficheiro = event.target.files[0];
+    if (!ficheiro) return;
+
+    const leitor = new FileReader();
+    leitor.addEventListener('load', () => {
+        imagemGuardada = leitor.result; // ...guarda o resultado na nossa variável
+        console.log('Imagem pronta para ser guardada.');
+    });
+    leitor.readAsDataURL(ficheiro);
+};
+
+tirarFotoInput.addEventListener('change', handleFile);
+escolherFicheiroInput.addEventListener('change', handleFile);
+
+
+// Listener do formulário ATUALIZADO
 form.addEventListener('submit', (event) => {
-  event.preventDefault();
+    event.preventDefault();
 
-  const nomeDoMedicamento = document.getElementById('nomeMedicamento').value;
-  const dataDeVencimento = document.getElementById('dataVencimento').value;
+    const nomeDoMedicamento = document.getElementById('nomeMedicamento').value;
+    const dataDeVencimento = document.getElementById('dataVencimento').value;
 
-  // Validação para garantir que os campos não estão vazios
-  if (nomeDoMedicamento === '' || dataDeVencimento === '') {
-    alert('Por favor, preencha todos os campos.');
-    return; 
-  }
+    if (!nomeDoMedicamento || !dataDeVencimento) {
+        alert('Por favor, preencha pelo menos o nome e a data de vencimento.');
+        return;
+    }
 
-  const novoMedicamento = {
-    nome: nomeDoMedicamento,
-    data: dataDeVencimento,
-    alerta30diasEnviado: false,
-    alerta15diasEnviado: false
-  };
+    const novoMedicamento = {
+        nome: nomeDoMedicamento,
+        data: dataDeVencimento,
+        alerta30diasEnviado: false,
+        alerta15diasEnviado: false
+    };
 
-  medicamentos.push(novoMedicamento);
+    // Se uma imagem foi guardada na nossa variável, adiciona-a ao objeto
+    if (imagemGuardada) {
+        novoMedicamento.imagem = imagemGuardada;
+    }
 
-  // Guarda a lista atualizada no localStorage
-  localStorage.setItem('listaDeMedicamentos', JSON.stringify(medicamentos));
-  
-  alert('Medicamento guardado com sucesso!');
+    medicamentos.push(novoMedicamento);
+    localStorage.setItem('listaDeMedicamentos', JSON.stringify(medicamentos));
+    
+    alert('Medicamento guardado com sucesso!');
     form.reset();
-   renderizarMedicamentos();
-    verificarAlertas(); // Re-verifica os alertas para atualizar a mensagem
+    imagemGuardada = null; // Limpa a imagem para o próximo registo
+    renderizarMedicamentos();
+    verificarAlertas();
 });
 
 // Listener para o botão de SINCRONIZAR COM A AGENDA (VERSÃO CORRIGIDA)
