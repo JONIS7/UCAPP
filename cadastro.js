@@ -62,7 +62,7 @@ function renderizarMedicamentos() {
   medicamentos.forEach((medicamento, index) => {
     // Usamos += para adicionar o HTML de cada card à nossa string
     listaContainer.innerHTML += `
-      <div class="col-3 mt-4"><div class="card mb-2">
+      <div class="col-12 col-md-6 col-lg-4 mb-3"><div class="card mb-2">
         <div class="card-body">
           <h5 class="card-title text-center">${medicamento.nome}</h5>
           <p class="card-text text-center">Vence em: ${medicamento.data}</p>
@@ -75,14 +75,20 @@ function renderizarMedicamentos() {
 }
 
 function apagarMedicamento(index) {
-  // Passo 1: Apagar da lista
-  medicamentos.splice(index, 1);
+  // 1. Mostra a pergunta de confirmação
+  const querApagar = confirm('Tem a certeza que deseja apagar este medicamento?');
 
-  // Passo 2: Guardar a nova lista no localStorage
-  localStorage.setItem('listaDeMedicamentos', JSON.stringify(medicamentos));
-
-  // Passo 3: Redesenhar os cards no ecrã
-  renderizarMedicamentos();
+  // 2. Se o utilizador clicou em "OK" (querApagar é true)...
+  if (querApagar) {
+    // ...executa o código para apagar
+    medicamentos.splice(index, 1);
+    localStorage.setItem('listaDeMedicamentos', JSON.stringify(medicamentos));
+    renderizarMedicamentos();
+    
+    // Re-verifica os alertas, pois um medicamento foi removido
+    verificarAlertas(); 
+  }
+  // Se o utilizador clicou em "Cancelar", a função termina e não faz nada.
 }
 
 
@@ -113,6 +119,7 @@ form.addEventListener('submit', (event) => {
   
   alert('Medicamento guardado com sucesso!');
     form.reset();
+   renderizarMedicamentos();
     verificarAlertas(); // Re-verifica os alertas para atualizar a mensagem
 });
 
