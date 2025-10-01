@@ -2,7 +2,7 @@
 
 Uma aplicação web para ajudar colaboradores a controlar a data de validade de produtos, com integração com a Agenda Google para lembretes automáticos.
 
-[![Ver Demo Ao Vivo](https://img.shields.io/badge/Ver%20Demo%20Ao%20Vivo-brightgreen)]([https://appuc.netlify.app/])
+[![Ver Demo Ao Vivo](https://img.shields.io/badge/Ver%20Demo%20Ao%20Vivo-brightgreen)](https://appuc.netlify.app/)
 
 ![Demonstração do App](https://raw.githubusercontent.com/JONIS7/UCAPP/main/gif%20github.gif)
 
