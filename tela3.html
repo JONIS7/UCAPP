@@ -7,18 +7,27 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="cadastro.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <style>
+        body{
+            background: linear-gradient(2000deg, #032c79, #000000);
+            height: 100vh;
+        }
+        .bg-custom-blue {
+  background-color: #04193f;
+}
+    </style>
 </head>
 
 <body">
     <!-- Barra de navegação -->
-     <nav class="navbar bg-white text-dark">
+     <nav class="navbar text-white rounded-3">
   <div class="container-fluid d-flex justify-content-center align-items-center">
     <h1 class="mt-3 fw-bold">Cadastro de Medicamento</h1>
   </div>
     </nav>
 
     <!--formulario-->
-    <div class="container mt-3 card p-5">
+    <div class="container mt-5 card p-5 rounded-5">
     <form id="medicamentoForm">
         <div class="mb-3">
             <label for="nomeMedicamento" class="form-label">Nome do Medicamento:</label>
@@ -43,16 +52,20 @@
 </div>
 
         <div class="text-center">
-            <button type="submit" class="btn btn-outline-primary">Salvar</button>
+            <button type="submit" class="btn btn-success w-50">Salvar</button>
         </div>
     </form>
-    <div class="container mt-4 card p-4 text-center">
+    <div class="container mt-4 card p-4 text-center rounded-5">
         <h2>Lembretes Pendentes</h2>
         <p id="mensagemAlertas">Nenhum lembrete para sincronizar.</p>
         <button id="sincronizarBtn" class="btn btn-success" disabled>Sincronizar com a Agenda</button>
     </div>
 </div>
-<h1 class="text-center fw-bold mt-4">Medicamentos Cadastrados</h1>
+<div class="container mt-3 card p-5 rounded-5">
+  <h1 class="text-center fw-bold mb-4 bg-custom-blue text-white p-3 rounded-4">Medicamentos Cadastrados</h1>
+  <div id="listaMedicamentos" class="row g-3">
+    </div>
+</div>
 <!--cards medicamentos-->
 <div id="listaMedicamentos" class="row">
 </div>

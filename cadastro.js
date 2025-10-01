@@ -89,7 +89,7 @@ function renderizarMedicamentos() {
         listaContainer.innerHTML += `
             <div class="col-12 col-md-6 col-lg-4 mb-3" data-bs-toggle="modal" data-bs-target="#modalDetalhesMedicamento">
                 <div class="card" ${estiloDoCard}>
-                    <div class="card-body">
+                    <div class="card-body d-flex justify-content-between align-items-center ">
                         <h5 class="card-title">${medicamento.nome}</h5>
                         <p class="card-text">Vence em: ${medicamento.data}</p>
                         <button class="btn btn-danger btn-sm" onclick="apagarMedicamento(${index})">Apagar</button>
