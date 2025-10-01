@@ -12,6 +12,9 @@
             background: linear-gradient(2000deg, #032c79, #000000);
             height: 100vh;
         }
+        .bg-custom-form {
+            background-color:#dfdfdf;
+        }
     </style>
 </head>
 
@@ -24,7 +27,7 @@
     </nav>
 
     <!--formulario-->
-    <div class="container mt-5 card p-5 rounded-5">
+    <div class="container mt-3 card p-5 rounded-5 bg-custom-form">
     <form id="medicamentoForm">
         <div class="mb-3">
             <label for="nomeMedicamento" class="form-label">Nome do Medicamento:</label>
@@ -58,7 +61,7 @@
         <button id="sincronizarBtn" class="btn btn-success" disabled>Sincronizar com a Agenda</button>
     </div>
 </div>
-<div class="container mt-3 card p-5 rounded-5">
+<div class="container mt-3 card p-5 rounded-5 bg-custom-form">
   <h1 class="text-center fw-bold mb-5">Medicamentos Cadastrados</h1>
   <div id="listaMedicamentos" class="row g-3">
     </div>
