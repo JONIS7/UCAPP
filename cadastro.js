@@ -17,6 +17,7 @@ const tirarFotoBtn = document.getElementById('tirarFotoBtn');
 const tirarFotoInput = document.getElementById('tirarFotoInput');
 const escolherFicheiroBtn = document.getElementById('escolherFicheiroBtn');
 const escolherFicheiroInput = document.getElementById('escolherFicheiroInput');
+const preview = document.getElementById("previewImagem");
 
 tirarFotoBtn.addEventListener('click', () => {
     tirarFotoInput.click();
@@ -127,10 +128,16 @@ const handleFile = (event) => {
     if (!ficheiro) return;
 
     const leitor = new FileReader();
+
     leitor.addEventListener('load', () => {
         imagemGuardada = leitor.result; // ...guarda o resultado na nossa variável
         console.log('Imagem pronta para ser guardada.');
+         // E mostra a pré-visualização
+        const preview = document.getElementById('previewImagem');
+        preview.src = imagemGuardada;
+        preview.style.display = 'block';
     });
+
     leitor.readAsDataURL(ficheiro);
 };
 
@@ -201,6 +208,8 @@ form.addEventListener('submit', (event) => {
     alert('Medicamento guardado com sucesso!');
     form.reset();
     imagemGuardada = null; // Limpa a imagem para o próximo registo
+    const preview = document.getElementById('previewImagem');
+    preview.style.display = 'none';
     renderizarMedicamentos();
     verificarAlertas();
 });
