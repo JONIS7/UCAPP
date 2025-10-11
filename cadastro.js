@@ -1,4 +1,4 @@
-// --- cadastro.js ATUALIZADO COM MEMÓRIA E CRIAÇÃO DE EVENTO ---
+
 
 // 1. CARREGAR DADOS: Tenta carregar os medicamentos guardados assim que a página abre.
 let medicamentos = [];
@@ -72,9 +72,9 @@ function renderizarMedicamentos() {
         // 1. Começamos com o estilo vazio
         let estiloDoCard = '';
 
-        // 2. Se o medicamento tiver uma imagem guardada...
+        // 2. Se o medicamento tiver uma imagem guardada.
         if (medicamento.imagem) {
-            // 3. ...definimos o estilo do background
+            // 3. estilo do background
             estiloDoCard = `
                 style="
                     background-image: url(${medicamento.imagem});
@@ -105,7 +105,7 @@ function apagarMedicamento(index) {
   // 1. Mostra a pergunta de confirmação
   const querApagar = confirm('Tem a certeza que deseja apagar este medicamento?');
 
-  // 2. Se o utilizador clicou em "OK" (querApagar é true)...
+  // 2. Se o utilizador clicou em "OK" 
   if (querApagar) {
     // ...executa o código para apagar
     medicamentos.splice(index, 1);
@@ -119,10 +119,10 @@ function apagarMedicamento(index) {
 }
 
 
-// QUANDO O FORMULÁRIO É ENVIADO (CLIQUE EM "SALVAR")
-let imagemGuardada = null; // Variável para guardar a imagem escolhida
+// --- 3. LÓGICA DE IMAGEM ---
+let imagemGuardada = null; //  guardar a imagem escolhida
 
-// Ouve os dois inputs de ficheiro. Quando uma imagem é escolhida...
+// Ouve os dois inputs de ficheiro. Quando uma imagem é escolhid
 const handleFile = (event) => {
     const ficheiro = event.target.files[0];
     if (!ficheiro) return;
@@ -130,7 +130,7 @@ const handleFile = (event) => {
     const leitor = new FileReader();
 
     leitor.addEventListener('load', () => {
-        imagemGuardada = leitor.result; // ...guarda o resultado na nossa variável
+        imagemGuardada = leitor.result; // ...guarda o resultado 
         console.log('Imagem pronta para ser guardada.');
          // E mostra a pré-visualização
         const preview = document.getElementById('previewImagem');
@@ -151,7 +151,6 @@ modalDetalhes.addEventListener('show.bs.modal', (event) => {
   const cardClicado = event.relatedTarget; 
 
   // 2. Pega no índice que guardámos no botão "Apagar" dentro desse card
-  // (Esta é uma forma inteligente de sabermos qual é o medicamento)
   const botaoApagar = cardClicado.querySelector('button');
   const index = botaoApagar.getAttribute('onclick').match(/\d+/)[0];
 
@@ -178,7 +177,7 @@ modalDetalhes.addEventListener('show.bs.modal', (event) => {
 });
 
 
-// Listener do formulário ATUALIZADO
+// Listener do formulário
 form.addEventListener('submit', (event) => {
     event.preventDefault();
 
@@ -197,7 +196,7 @@ form.addEventListener('submit', (event) => {
         alerta15diasEnviado: false
     };
 
-    // Se uma imagem foi guardada na nossa variável, adiciona-a ao objeto
+    // Se uma imagem foi guardadal, adiciona-a ao objeto
     if (imagemGuardada) {
         novoMedicamento.imagem = imagemGuardada;
     }
@@ -214,7 +213,7 @@ form.addEventListener('submit', (event) => {
     verificarAlertas();
 });
 
-// Listener para o botão de SINCRONIZAR COM A AGENDA (VERSÃO CORRIGIDA)
+// Listener para o botão de SINCRONIZAR COM A AGENDA
 sincronizarBtn.addEventListener('click', () => {
     const tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: '91249466385-m87mafvbgn4f12d81t9qshj3ior2phvu.apps.googleusercontent.com',
@@ -230,8 +229,7 @@ sincronizarBtn.addEventListener('click', () => {
                 // Promise.all espera que TODAS as promessas terminem
                 Promise.all(promessasDeEventos)
                 .then(() => {
-                    // SÓ DEPOIS de todos os eventos serem criados...
-                    // ...é que guardamos a lista atualizada e mostramos o alerta.
+                    // Depois de todos os eventos serem criados, guarda o estado atualizado
                     localStorage.setItem('listaDeMedicamentos', JSON.stringify(medicamentos));
                     alert('Lembretes sincronizados com a sua agenda!');
                     verificarAlertas(); // Re-verifica para limpar a mensagem e desativar o botão
@@ -276,6 +274,6 @@ function criarEvento(accessToken, lembrete) {
 }
 
 // --- 5. EXECUÇÃO INICIAL ---
-// A primeira coisa que acontece quando a página carrega é verificar os alertas.
+// Ao carregar a página, verifica alertas e renderiza os medicamentos
 verificarAlertas();
 renderizarMedicamentos();
