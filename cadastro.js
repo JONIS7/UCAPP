@@ -4,8 +4,8 @@
 let medicamentos = [];
 const medicamentosGuardados = localStorage.getItem('listaDeMedicamentos');
 if (medicamentosGuardados) {
-  // Se encontrou algo guardado, converte o texto de volta para uma lista.
-  medicamentos = JSON.parse(medicamentosGuardados);
+    // Se encontrou algo guardado, converte o texto de volta para uma lista.
+    medicamentos = JSON.parse(medicamentosGuardados);
 }
 console.log('Lista de medicamentos carregada:', medicamentos);
 
@@ -64,36 +64,30 @@ function renderizarMedicamentos() {
     listaContainer.innerHTML = '';
 
     if (medicamentos.length === 0) {
-        listaContainer.innerHTML = '<p class="text-center">Nenhum medicamento registado.</p>';
+        listaContainer.innerHTML = '<div class="col-12"><p class="text-center text-muted p-5">Nenhum medicamento registrado.</p></div>';
         return;
     }
 
     medicamentos.forEach((medicamento, index) => {
-        // 1. Começamos com o estilo vazio
-        let estiloDoCard = '';
+        const [ano, mes, dia] = medicamento.data.split('-');
+        const formatada = `${dia}/${mes}/${ano}`;
 
-        // 2. Se o medicamento tiver uma imagem guardada.
-        if (medicamento.imagem) {
-            // 3. estilo do background
-            estiloDoCard = `
-                style="
-                    background-image: url(${medicamento.imagem});
-                    background-size: cover;
-                    background-position: center;
-                    color: white; 
-                    text-shadow: 1px 1px 2px black;
-                "
-            `;
-        }
-
-        // 4. Inserimos a variável de estilo na div do card
         listaContainer.innerHTML += `
-            <div class="col-12 col-md-6 col-lg-4 mb-3" data-bs-toggle="modal" data-bs-target="#modalDetalhesMedicamento">
-                <div class="card rounded-4" ${estiloDoCard}>
-                    <div class="card-body d-flex justify-content-between align-items-center ">
-                        <h5 class="card-title">${medicamento.nome}</h5>
-                        <p class="card-text">Vence em: ${medicamento.data}</p>
-                        <button class="btn btn-danger btn-sm" onclick="apagarMedicamento(${index})">Apagar</button>
+            <div class="col-12 col-md-6 col-lg-4 mb-3 animate-fade-in" style="animation-delay: ${index * 0.1}s">
+                <div class="card rounded-4 shadow-sm h-100" data-bs-toggle="modal" data-bs-target="#modalDetalhesMedicamento" onclick="prepararModal(${index})">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title fw-bold text-primary mb-0">${medicamento.nome}</h5>
+                            <button class="btn btn-link text-danger p-0" onclick="event.stopPropagation(); apagarMedicamento(${index})">
+                                <small>Remover</small>
+                            </button>
+                        </div>
+                        <div class="mt-auto">
+                            <p class="card-text mb-0">
+                                <span class="text-muted small">Vencimento:</span><br>
+                                <span class="fw-bold text-dark">${formatada}</span>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -102,40 +96,85 @@ function renderizarMedicamentos() {
 }
 
 function apagarMedicamento(index) {
-  // 1. Mostra a pergunta de confirmação
-  const querApagar = confirm('Tem a certeza que deseja apagar este medicamento?');
+    // 1. Mostra a pergunta de confirmação
+    const querApagar = confirm('Tem a certeza que deseja apagar este medicamento?');
 
-  // 2. Se o utilizador clicou em "OK" 
-  if (querApagar) {
-    // ...executa o código para apagar
-    medicamentos.splice(index, 1);
-    localStorage.setItem('listaDeMedicamentos', JSON.stringify(medicamentos));
-    renderizarMedicamentos();
-    
-    // Re-verifica os alertas, pois um medicamento foi removido
-    verificarAlertas(); 
-  }
-  // Se o utilizador clicou em "Cancelar", a função termina e não faz nada.
+    // 2. Se o utilizador clicou em "OK" 
+    if (querApagar) {
+        // ...executa o código para apagar
+        medicamentos.splice(index, 1);
+        localStorage.setItem('listaDeMedicamentos', JSON.stringify(medicamentos));
+        renderizarMedicamentos();
+
+        // Re-verifica os alertas, pois um medicamento foi removido
+        verificarAlertas();
+    }
+    // Se o utilizador clicou em "Cancelar", a função termina e não faz nada.
 }
 
 
-// --- 3. LÓGICA DE IMAGEM ---
-let imagemGuardada = null; //  guardar a imagem escolhida
+// --- 3. LÓGICA DE IMAGEM COM COMPRESSÃO ---
+let imagemGuardada = null;
 
-// Ouve os dois inputs de ficheiro. Quando uma imagem é escolhid
-const handleFile = (event) => {
+function compressImage(base64Str, maxWidth = 800, maxHeight = 800) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.src = base64Str;
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+                if (width > maxWidth) {
+                    height *= maxWidth / width;
+                    width = maxWidth;
+                }
+            } else {
+                if (height > maxHeight) {
+                    width *= maxHeight / height;
+                    height = maxHeight;
+                }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.7)); // Comprime para JPEG com 70% de qualidade
+        };
+    });
+}
+
+const handleFile = async (event) => {
     const ficheiro = event.target.files[0];
     if (!ficheiro) return;
 
+    // Feedback visual de carregamento
+    const preview = document.getElementById('previewImagem');
+    const loadingText = document.createElement('p');
+    loadingText.id = 'loadingPhoto';
+    loadingText.className = 'text-primary small';
+    loadingText.textContent = 'Processando foto...';
+    preview.parentNode.insertBefore(loadingText, preview);
+
     const leitor = new FileReader();
 
-    leitor.addEventListener('load', () => {
-        imagemGuardada = leitor.result; // ...guarda o resultado 
-        console.log('Imagem pronta para ser guardada.');
-         // E mostra a pré-visualização
-        const preview = document.getElementById('previewImagem');
-        preview.src = imagemGuardada;
-        preview.style.display = 'block';
+    leitor.addEventListener('load', async () => {
+        try {
+            // Comprime a imagem antes de guardar
+            imagemGuardada = await compressImage(leitor.result);
+            console.log('Imagem comprimida e pronta.');
+
+            preview.src = imagemGuardada;
+            preview.style.display = 'block';
+            if (document.getElementById('loadingPhoto')) {
+                document.getElementById('loadingPhoto').remove();
+            }
+        } catch (error) {
+            console.error('Erro ao processar imagem:', error);
+            alert('Erro ao processar a foto. Tente novamente.');
+        }
     });
 
     leitor.readAsDataURL(ficheiro);
@@ -144,37 +183,29 @@ const handleFile = (event) => {
 tirarFotoInput.addEventListener('change', handleFile);
 escolherFicheiroInput.addEventListener('change', handleFile);
 
-const modalDetalhes = document.getElementById('modalDetalhesMedicamento');
+// Função auxiliar para preencher o modal (chamada pelo onclick do card)
+function prepararModal(index) {
+    const medicamento = medicamentos[index];
+    const modalTitulo = document.getElementById('modalTitulo');
+    const modalNome = document.getElementById('modalNome');
+    const modalData = document.getElementById('modalData');
+    const modalImagem = document.getElementById('modalImagem');
 
-modalDetalhes.addEventListener('show.bs.modal', (event) => {
-  // 1. Descobre qual card foi clicado
-  const cardClicado = event.relatedTarget; 
+    modalTitulo.textContent = 'Detalhes do Medicamento';
+    modalNome.textContent = medicamento.nome;
+    // Converte a data string (YYYY-MM-DD) para formato legível pt-BR
+    const [ano, mes, dia] = medicamento.data.split('-');
+    modalData.textContent = `${dia}/${mes}/${ano}`;
 
-  // 2. Pega no índice que guardámos no botão "Apagar" dentro desse card
-  const botaoApagar = cardClicado.querySelector('button');
-  const index = botaoApagar.getAttribute('onclick').match(/\d+/)[0];
+    if (medicamento.imagem) {
+        modalImagem.src = medicamento.imagem;
+        modalImagem.style.display = 'block';
+    } else {
+        modalImagem.style.display = 'none';
+    }
+}
 
-  // 3. Com o índice, pega no objeto do medicamento
-  const medicamento = medicamentos[index];
-
-  // 4. Seleciona os elementos dentro do modal
-  const modalTitulo = document.getElementById('modalTitulo');
-  const modalNome = document.getElementById('modalNome');
-  const modalData = document.getElementById('modalData');
-  const modalImagem = document.getElementById('modalImagem');
-
-  // 5. Preenche o modal com as informações do medicamento
-  modalTitulo.textContent = medicamento.nome;
-  modalNome.textContent = medicamento.nome;
-  modalData.textContent = medicamento.data;
-
-  if (medicamento.imagem) {
-    modalImagem.src = medicamento.imagem;
-    modalImagem.style.display = 'block'; // Mostra a imagem
-  } else {
-    modalImagem.style.display = 'none'; // Esconde a imagem se não houver
-  }
-});
+// O preenchimento do modal agora é feito pela função prepararModal chamada no clique do card.
 
 
 // Listener do formulário
@@ -203,7 +234,7 @@ form.addEventListener('submit', (event) => {
 
     medicamentos.push(novoMedicamento);
     localStorage.setItem('listaDeMedicamentos', JSON.stringify(medicamentos));
-    
+
     alert('Medicamento guardado com sucesso!');
     form.reset();
     imagemGuardada = null; // Limpa a imagem para o próximo registo
@@ -220,7 +251,7 @@ sincronizarBtn.addEventListener('click', () => {
         scope: 'https://www.googleapis.com/auth/calendar.events',
         callback: (tokenResponse) => {
             if (tokenResponse && tokenResponse.access_token) {
-                
+
                 // Cria uma lista de "promessas" de criação de eventos
                 const promessasDeEventos = lembretesPendentes.map(lembrete => {
                     return criarEvento(tokenResponse.access_token, lembrete);
@@ -228,12 +259,12 @@ sincronizarBtn.addEventListener('click', () => {
 
                 // Promise.all espera que TODAS as promessas terminem
                 Promise.all(promessasDeEventos)
-                .then(() => {
-                    // Depois de todos os eventos serem criados, guarda o estado atualizado
-                    localStorage.setItem('listaDeMedicamentos', JSON.stringify(medicamentos));
-                    alert('Lembretes sincronizados com a sua agenda!');
-                    verificarAlertas(); // Re-verifica para limpar a mensagem e desativar o botão
-                });
+                    .then(() => {
+                        // Depois de todos os eventos serem criados, guarda o estado atualizado
+                        localStorage.setItem('listaDeMedicamentos', JSON.stringify(medicamentos));
+                        alert('Lembretes sincronizados com a sua agenda!');
+                        verificarAlertas(); // Re-verifica para limpar a mensagem e desativar o botão
+                    });
             }
         },
     });
@@ -260,17 +291,17 @@ function criarEvento(accessToken, lembrete) {
         },
         body: JSON.stringify(event),
     })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Evento criado:', data);
-        // Atualiza o estado do alerta no objeto original
-        const medicamentoOriginal = medicamentos.find(m => m.nome === nome && m.data === lembrete.data);
-        if (medicamentoOriginal) {
-            if (tipoAlerta === 30) medicamentoOriginal.alerta30diasEnviado = true;
-            if (tipoAlerta === 15) medicamentoOriginal.alerta15diasEnviado = true;
-        }
-    })
-    .catch(error => console.error('Erro ao criar evento:', error));
+        .then(response => response.json())
+        .then(data => {
+            console.log('Evento criado:', data);
+            // Atualiza o estado do alerta no objeto original
+            const medicamentoOriginal = medicamentos.find(m => m.nome === nome && m.data === lembrete.data);
+            if (medicamentoOriginal) {
+                if (tipoAlerta === 30) medicamentoOriginal.alerta30diasEnviado = true;
+                if (tipoAlerta === 15) medicamentoOriginal.alerta15diasEnviado = true;
+            }
+        })
+        .catch(error => console.error('Erro ao criar evento:', error));
 }
 
 // --- 5. EXECUÇÃO INICIAL ---
